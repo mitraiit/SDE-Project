@@ -1,0 +1,218 @@
+package com.demo.project;
+
+import static org.testng.Assert.assertEquals;
+
+import static org.testng.Assert.assertTrue;
+
+import java.io.File;
+
+import java.util.concurrent.TimeUnit;
+
+import org.openqa.selenium.By;
+
+import org.openqa.selenium.WebDriver;
+
+import org.openqa.selenium.WebElement;
+
+import org.openqa.selenium.chrome.ChromeDriver;
+
+import org.testng.annotations.AfterClass;
+
+import org.testng.annotations.BeforeClass;
+
+import org.testng.annotations.Test;
+
+import com.demo.utility.JiraCreateIssue;
+
+public class HomePageTest {
+
+    private WebDriver driver;
+
+    private String baseUrl;
+
+@BeforeClass(alwaysRun = true)
+
+    public void setUp() throws Exception {
+
+        File chromedriverExecutable = new File("driver/chromedriver.exe");
+
+        System.setProperty("webdriver.chrome.driver", chromedriverExecutable.getAbsolutePath());
+
+        driver = new ChromeDriver();
+
+        baseUrl = "https://www.browserstack.com/";
+
+        driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+
+    }
+
+
+//Custom annotation explained in following sections
+
+    @JiraCreateIssue(isCreateIssue=true) 
+
+    @Test
+
+    public void verifyHomepageHeaderText() throws Exception {
+
+        driver.get(baseUrl);
+
+        WebElement el = driver.findElement(By.xpath("//h1[1]"));
+
+        assertEquals(el.getText(), "Browser Testing Made Easy","Wrong header text displayed in Home page");
+
+    }
+    
+
+    @JiraCreateIssue(isCreateIssue=true)
+
+    @Test
+
+    public void verifyHomePageLogo() throws Exception {
+
+        driver.get(baseUrl);
+
+        WebElement el = driver.findElement(By.id("logo"));
+
+        assertTrue(el.isDisplayed(),"The browserstack logo not displaying in home page");
+
+    }
+
+
+    @AfterClass(alwaysRun = true)
+
+    public void tearDown() throws Exception {
+
+        driver.quit();
+
+    }
+
+}
+
+---------------------------------------------------------------------------
+
+Listeners for Reporting
+
+
+package com.demo.listener;
+
+import org.apache.commons.lang.exception.ExceptionUtils;
+
+import org.testng.ITestContext;
+
+import org.testng.ITestListener;
+
+import org.testng.ITestResult;
+
+import com.demo.utility.JiraCreateIssue;
+
+import com.demo.utility.JiraServiceProvider;
+
+
+public class TestListener implements ITestListener {
+
+
+    @Override
+
+    public void onTestFailure(ITestResult result) {
+
+        boolean islogIssue = result.getMethod().getConstructorOrMethod().getMethod().getAnnotation(JiraCreateIssue.class).isCreateIssue();
+
+        if (islogIssue) {
+
+//Provide proper Jira project URL ex: https://browsertack.atlassian.net 
+
+//Jira User name ex: browserstack@gmail.com
+
+//API token copy from Jira dashboard ex: lorelimpusm12uijk
+
+//Project key should be, Short name ex: BS
+
+
+            JiraServiceProvider JiraServiceProvider = new JiraServiceProvider("https://example.atlassian.net",
+
+                    "example@gmail.com", "lorelimpusm12uijk", "BS");
+
+
+
+            String issueDescription = "Failure Reason from Automation Testing\n\n" + result.getThrowable().getMessage()
+
+                    + "\n";
+
+            issueDescription.concat(ExceptionUtils.getFullStackTrace(result.getThrowable()));
+
+
+
+
+            String issueSummary = result.getMethod().getConstructorOrMethod().getMethod().getName()
+
+                    + " Failed in Automation Testing";
+
+            
+
+            JiraServiceProvider.createJiraIssue("Bug", issueSummary, issueDescription, "Automated Testing");
+
+        }
+
+    }
+
+    @Override
+
+    public void onTestSkipped(ITestResult result) {
+
+        // TODO Auto-generated method stub
+
+
+
+
+    }
+
+    @Override
+
+    public void onTestFailedButWithinSuccessPercentage(ITestResult result) {
+
+        // TODO Auto-generated method stub
+
+
+    }
+
+    @Override
+
+    public void onStart(ITestContext context) {
+
+        // TODO Auto-generated method stub
+
+
+    }
+
+
+    @Override
+
+    public void onFinish(ITestContext context) {
+
+        // TODO Auto-generated method stub
+
+
+    }
+
+
+    @Override
+
+    public void onTestStart(ITestResult result) {
+
+        // TODO Auto-generated method stub
+
+
+    }
+
+
+    @Override
+
+    public void onTestSuccess(ITestResult result) {
+
+        // TODO Auto-generated method stub
+
+
+    }
+
+}
